@@ -1,0 +1,8 @@
+.idea
+artifacts
+build
+cache
+node_modules
+contracts/*.bak
+coverage/
+coverage.json
