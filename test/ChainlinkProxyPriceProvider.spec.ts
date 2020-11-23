@@ -36,6 +36,10 @@ describe('ChainlinkProxyPriceProvider', function () {
       expect(await this.provider.getAssetPrice(this.LINKAddress)).to.be.bignumber.equal(ether('0.02496761'))
     })
 
+    it('returns 1 ether if the eth address is provided', async function () {
+      expect(await this.provider.getAssetPrice(this.WETHAddress)).to.be.bignumber.equal(ether('1'))
+    })
+
     it('reverts if asset has no source', async function () {
       await expectRevert(this.provider.getAssetPrice(this.DAIAddress), 'SOURCE_IS_MISSING')
     })
