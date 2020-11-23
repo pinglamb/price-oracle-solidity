@@ -2,6 +2,7 @@
 // https://github.com/aave/aave-protocol/blob/e8d020e9752fbd4807a3b55f9cf98a88dcfb674d/contracts/misc/ChainlinkProxyPriceProvider.sol
 // Changes:
 // - Upgrade to solidity 0.6.11
+// - Remove fallbackOracle
 
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.6.11;
@@ -16,27 +17,17 @@ import './libraries/EthAddressLib.sol';
 /// @author Aave
 /// @notice Proxy smart contract to get the price of an asset from a price source, with Chainlink Aggregator
 ///         smart contracts as primary option
-/// - If the returned price by a Chainlink aggregator is <= 0, the call is forwarded to a fallbackOracle
+/// - If the returned price by a Chainlink aggregator is <= 0, the transaction will be reverted
 /// - Owned by the Aave governance system, allowed to add sources for assets, replace them
-///   and change the fallbackOracle
 contract ChainlinkProxyPriceProvider is IPriceOracleGetter, Ownable {
     event AssetSourceUpdated(address indexed asset, address indexed source);
-    event FallbackOracleUpdated(address indexed fallbackOracle);
 
     mapping(address => IChainlinkAggregator) private assetsSources;
-    IPriceOracleGetter private fallbackOracle;
 
     /// @notice Constructor
     /// @param _assets The addresses of the assets
     /// @param _sources The address of the source of each asset
-    /// @param _fallbackOracle The address of the fallback oracle to use if the data of an
-    ///        aggregator is not consistent
-    constructor(
-        address[] memory _assets,
-        address[] memory _sources,
-        address _fallbackOracle
-    ) public {
-        internalSetFallbackOracle(_fallbackOracle);
+    constructor(address[] memory _assets, address[] memory _sources) public {
         internalSetAssetsSources(_assets, _sources);
     }
 
@@ -45,13 +36,6 @@ contract ChainlinkProxyPriceProvider is IPriceOracleGetter, Ownable {
     /// @param _sources The address of the source of each asset
     function setAssetSources(address[] calldata _assets, address[] calldata _sources) external onlyOwner {
         internalSetAssetsSources(_assets, _sources);
-    }
-
-    /// @notice Sets the fallbackOracle
-    /// - Callable only by the Aave governance
-    /// @param _fallbackOracle The address of the fallbackOracle
-    function setFallbackOracle(address _fallbackOracle) external onlyOwner {
-        internalSetFallbackOracle(_fallbackOracle);
     }
 
     /// @notice Internal function to set the sources for each asset
@@ -65,13 +49,6 @@ contract ChainlinkProxyPriceProvider is IPriceOracleGetter, Ownable {
         }
     }
 
-    /// @notice Internal function to set the fallbackOracle
-    /// @param _fallbackOracle The address of the fallbackOracle
-    function internalSetFallbackOracle(address _fallbackOracle) internal {
-        fallbackOracle = IPriceOracleGetter(_fallbackOracle);
-        emit FallbackOracleUpdated(_fallbackOracle);
-    }
-
     /// @notice Gets an asset price by address
     /// @param _asset The asset address
     function getAssetPrice(address _asset) public view override returns (uint256) {
@@ -79,17 +56,13 @@ contract ChainlinkProxyPriceProvider is IPriceOracleGetter, Ownable {
         if (_asset == EthAddressLib.ethAddress()) {
             return 1 ether;
         } else {
-            // If there is no registered source for the asset, call the fallbackOracle
-            if (address(source) == address(0)) {
-                return IPriceOracleGetter(fallbackOracle).getAssetPrice(_asset);
-            } else {
-                int256 _price = IChainlinkAggregator(source).latestAnswer();
-                if (_price > 0) {
-                    return uint256(_price);
-                } else {
-                    return IPriceOracleGetter(fallbackOracle).getAssetPrice(_asset);
-                }
-            }
+            // Require the asset has registered source
+            require(address(source) != address(0), 'SOURCE_IS_MISSING');
+
+            int256 _price = IChainlinkAggregator(source).latestAnswer();
+            require(_price > 0, 'INVALID_PRICE');
+
+            return uint256(_price);
         }
     }
 
@@ -108,11 +81,5 @@ contract ChainlinkProxyPriceProvider is IPriceOracleGetter, Ownable {
     /// @return address The address of the source
     function getSourceOfAsset(address _asset) external view returns (address) {
         return address(assetsSources[_asset]);
-    }
-
-    /// @notice Gets the address of the fallback oracle
-    /// @return address The addres of the fallback oracle
-    function getFallbackOracle() external view returns (address) {
-        return address(fallbackOracle);
     }
 }

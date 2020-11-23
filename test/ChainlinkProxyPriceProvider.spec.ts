@@ -1,5 +1,5 @@
 import { accounts, contract } from '@openzeppelin/test-environment'
-import { ether, expectRevert, constants } from '@openzeppelin/test-helpers'
+import { ether, expectRevert } from '@openzeppelin/test-helpers'
 import { expect } from 'chai'
 
 const ChainlinkProxyPriceProvider = contract.fromArtifact('ChainlinkProxyPriceProvider')
@@ -19,10 +19,11 @@ describe('ChainlinkProxyPriceProvider', function () {
     // https://etherscan.io/address/0xDC530D9457755926550b59e8ECcdaE7624181557#readContract
     await this.LINKETH.setLatestAnswer('24967610000000000', '1606150638')
 
+    this.DAIAddress = '0x6b175474e89094c44da98b954eedeac495271d0f'
+
     this.provider = await ChainlinkProxyPriceProvider.new(
       [this.USDTAddress, this.LINKAddress],
       [this.USDTETH.address, this.LINKETH.address],
-      constants.ZERO_ADDRESS,
       { from: owner }
     )
   })
@@ -32,6 +33,18 @@ describe('ChainlinkProxyPriceProvider', function () {
       expect(await this.provider.getAssetPrice(this.USDTAddress)).to.be.bignumber.equal(ether('0.001677'))
       expect(await this.provider.getAssetPrice(this.LINKAddress)).to.be.bignumber.equal(ether('0.02496761'))
     })
+
+    it('reverts if asset has no source', async function () {
+      await expectRevert(this.provider.getAssetPrice(this.DAIAddress), 'SOURCE_IS_MISSING')
+    })
+
+    it('reverts if source is returning zero or negative price', async function () {
+      await this.USDTETH.setLatestAnswer('0', '1606151568')
+      await expectRevert(this.provider.getAssetPrice(this.USDTAddress), 'INVALID_PRICE')
+
+      await this.LINKETH.setLatestAnswer('-1', '1606150638')
+      await expectRevert(this.provider.getAssetPrice(this.LINKAddress), 'INVALID_PRICE')
+    })
   })
 
   describe('getAssetsPrices', function () {
@@ -39,6 +52,18 @@ describe('ChainlinkProxyPriceProvider', function () {
       const prices = await this.provider.getAssetsPrices([this.USDTAddress, this.LINKAddress])
       expect(prices[0]).to.be.bignumber.equal(ether('0.001677'))
       expect(prices[1]).to.be.bignumber.equal(ether('0.02496761'))
+    })
+
+    it('reverts if any asset on the list has no source', async function () {
+      await expectRevert(
+        this.provider.getAssetsPrices([this.USDTAddress, this.LINKAddress, this.DAIAddress]),
+        'SOURCE_IS_MISSING'
+      )
+    })
+
+    it('reverts if any asset returns invalid price', async function () {
+      await this.USDTETH.setLatestAnswer('0', '1606151568')
+      await expectRevert(this.provider.getAssetsPrices([this.USDTAddress, this.LINKAddress]), 'INVALID_PRICE')
     })
   })
 
