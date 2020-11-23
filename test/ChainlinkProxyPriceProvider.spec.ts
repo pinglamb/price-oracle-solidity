@@ -9,17 +9,17 @@ describe('ChainlinkProxyPriceProvider', function () {
   const [owner, ...users] = accounts
 
   beforeEach(async function () {
-    this.USDTAddress = '0xdac17f958d2ee523a2206206994597c13d831ec7'
+    this.USDTAddress = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
     this.USDTETH = await MockChainlinkAggregator.new()
     // https://etherscan.io/address/0xEe9F2375b4bdF6387aa8265dD4FB8F16512A1d46#readContract
     await this.USDTETH.setLatestAnswer('1677000000000000', '1606151568')
 
-    this.LINKAddress = '0x514910771af9ca656af840dff83e8264ecf986ca'
+    this.LINKAddress = '0x514910771AF9Ca656af840dff83E8264EcF986CA'
     this.LINKETH = await MockChainlinkAggregator.new()
     // https://etherscan.io/address/0xDC530D9457755926550b59e8ECcdaE7624181557#readContract
     await this.LINKETH.setLatestAnswer('24967610000000000', '1606150638')
 
-    this.DAIAddress = '0x6b175474e89094c44da98b954eedeac495271d0f'
+    this.DAIAddress = '0x6B175474E89094C44Da98b954EedeAC495271d0F'
 
     this.provider = await ChainlinkProxyPriceProvider.new(
       [this.USDTAddress, this.LINKAddress],
