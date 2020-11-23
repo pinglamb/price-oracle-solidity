@@ -7,15 +7,19 @@
   "license": "MIT",
   "devDependencies": {
     "@openzeppelin/contracts": "^3.2.0",
+    "@openzeppelin/test-environment": "^0.1.6",
+    "@openzeppelin/test-helpers": "^0.5.9",
     "@types/mocha": "^8.0.4",
     "@typescript-eslint/eslint-plugin": "^4.8.2",
     "@typescript-eslint/parser": "^4.8.2",
+    "chai": "^4.2.0",
     "eslint": "^7.14.0",
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-mocha-no-only": "^1.1.1",
     "eslint-plugin-prettier": "^3.1.4",
     "prettier": "^2.2.0",
     "prettier-plugin-solidity": "^1.0.0-beta.1",
+    "solidity-coverage": "^0.7.12",
     "truffle": "^5.1.54",
     "ts-node": "^9.0.0",
     "typescript": "^4.1.2"
@@ -23,7 +27,9 @@
   "scripts": {
     "lint:js": "eslint . --ext .js,.ts",
     "compile": "truffle compile",
+    "compile:coverage": "truffle compile -- truffle-config.coverage.js",
     "pretest": "yarn compile",
-    "test": "mocha"
+    "test": "mocha",
+    "coverage": "scripts/coverage.js"
   }
 }
