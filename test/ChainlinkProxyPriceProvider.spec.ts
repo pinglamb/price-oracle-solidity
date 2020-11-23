@@ -1,5 +1,5 @@
 import { accounts, contract } from '@openzeppelin/test-environment'
-import { ether, expectRevert } from '@openzeppelin/test-helpers'
+import { ether, expectRevert, constants } from '@openzeppelin/test-helpers'
 import { expect } from 'chai'
 
 const ChainlinkProxyPriceProvider = contract.fromArtifact('ChainlinkProxyPriceProvider')
@@ -20,12 +20,14 @@ describe('ChainlinkProxyPriceProvider', function () {
     await this.LINKETH.setLatestAnswer('24967610000000000', '1606150638')
 
     this.DAIAddress = '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+    this.WETHAddress = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
 
     this.provider = await ChainlinkProxyPriceProvider.new(
       [this.USDTAddress, this.LINKAddress],
       [this.USDTETH.address, this.LINKETH.address],
       { from: owner }
     )
+    await this.provider.setETHAddress(this.WETHAddress, { from: owner })
   })
 
   describe('getAssetPrice', function () {
@@ -96,6 +98,24 @@ describe('ChainlinkProxyPriceProvider', function () {
     it('gets the address of the source for an asset address', async function () {
       expect(await this.provider.getSourceOfAsset(this.USDTAddress)).to.equal(this.USDTETH.address)
       expect(await this.provider.getSourceOfAsset(this.LINKAddress)).to.equal(this.LINKETH.address)
+    })
+  })
+
+  describe('setETHAddress', function () {
+    it('sets the ethAddress', async function () {
+      // Already set in beforeEach block
+      expect(await this.provider.getETHAddress()).to.equal(this.WETHAddress)
+    })
+
+    it('reverts if zero address is provided', async function () {
+      await expectRevert(this.provider.setETHAddress(constants.ZERO_ADDRESS, { from: owner }), 'ADDRESS_IS_ZERO')
+    })
+
+    it('restricts to only owner', async function () {
+      await expectRevert(
+        this.provider.setETHAddress(this.WETHAddress, { from: users[0] }),
+        'Ownable: caller is not the owner'
+      )
     })
   })
 

@@ -3,6 +3,7 @@
 // Changes:
 // - Upgrade to solidity 0.6.11
 // - Remove fallbackOracle
+// - Store ethAddress (for potential WETH support)
 
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.6.11;
@@ -11,7 +12,6 @@ import '@openzeppelin/contracts/access/Ownable.sol';
 
 import './interfaces/IPriceOracleGetter.sol';
 import './interfaces/IChainlinkAggregator.sol';
-import './libraries/EthAddressLib.sol';
 
 /// @title ChainlinkProxyPriceProvider
 /// @author Aave
@@ -23,6 +23,7 @@ contract ChainlinkProxyPriceProvider is IPriceOracleGetter, Ownable {
     event AssetSourceUpdated(address indexed asset, address indexed source);
 
     mapping(address => IChainlinkAggregator) private assetsSources;
+    address private ethAddress;
 
     /// @notice Constructor
     /// @param _assets The addresses of the assets
@@ -53,7 +54,7 @@ contract ChainlinkProxyPriceProvider is IPriceOracleGetter, Ownable {
     /// @param _asset The asset address
     function getAssetPrice(address _asset) public view override returns (uint256) {
         IChainlinkAggregator source = assetsSources[_asset];
-        if (_asset == EthAddressLib.ethAddress()) {
+        if (_asset == ethAddress) {
             return 1 ether;
         } else {
             // Require the asset has registered source
@@ -81,5 +82,19 @@ contract ChainlinkProxyPriceProvider is IPriceOracleGetter, Ownable {
     /// @return address The address of the source
     function getSourceOfAsset(address _asset) external view returns (address) {
         return address(assetsSources[_asset]);
+    }
+
+    /// @notice Sets the ethAddress, in aave the ethAddress is a special representation for ETH,
+    ///         generalized to be configurable per system, can be for example WETH address
+    /// @param _ethAddress The address of ETH
+    function setETHAddress(address _ethAddress) external onlyOwner {
+        require(_ethAddress != address(0), 'ADDRESS_IS_ZERO');
+        ethAddress = _ethAddress;
+    }
+
+    /// @notice Gets the ethAddress
+    /// @return address The ethAddress
+    function getETHAddress() external view returns (address) {
+        return ethAddress;
     }
 }
