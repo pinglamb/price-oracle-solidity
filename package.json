@@ -27,7 +27,7 @@
   "scripts": {
     "lint:js": "eslint . --ext .js,.ts",
     "compile": "truffle compile",
-    "compile:coverage": "truffle compile -- truffle-config.coverage.js",
+    "compile:coverage": "truffle compile --config truffle-config.coverage.js",
     "pretest": "yarn compile",
     "test": "mocha",
     "coverage": "scripts/coverage.js"

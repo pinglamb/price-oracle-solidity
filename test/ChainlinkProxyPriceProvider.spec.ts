@@ -67,6 +67,31 @@ describe('ChainlinkProxyPriceProvider', function () {
     })
   })
 
+  describe('setAssetSources', function () {
+    it('sets or replaces sources of assets', async function () {
+      await this.provider.setAssetSources(
+        [this.USDTAddress, this.DAIAddress],
+        [this.LINKETH.address, this.USDTETH.address],
+        { from: owner }
+      )
+
+      expect(await this.provider.getSourceOfAsset(this.USDTAddress)).to.equal(this.LINKETH.address)
+      expect(await this.provider.getSourceOfAsset(this.LINKAddress)).to.equal(this.LINKETH.address)
+      expect(await this.provider.getSourceOfAsset(this.DAIAddress)).to.equal(this.USDTETH.address)
+    })
+
+    it('reverts if the array length does not match', async function () {
+      await expectRevert(
+        this.provider.setAssetSources([this.USDTAddress, this.LINKAddress], [this.USDTETH.address], { from: owner }),
+        'INCONSISTENT_PARAMS_LENGTH'
+      )
+    })
+
+    it('restricts to only owner', async function () {
+      await expectRevert(this.provider.setAssetSources([], [], { from: users[0] }), 'Ownable: caller is not the owner')
+    })
+  })
+
   describe('getSourceOfAsset', function () {
     it('gets the address of the source for an asset address', async function () {
       expect(await this.provider.getSourceOfAsset(this.USDTAddress)).to.equal(this.USDTETH.address)
