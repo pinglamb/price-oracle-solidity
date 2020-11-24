@@ -26,6 +26,21 @@ can be used if the system is using that to wrap ETH.
 
 Commit: https://github.com/pinglamb/price-oracle-solidity/commit/162c3e25066d1c24eadcadc6c1b678ad14f94887
 
+#### getETHPriceInAsset
+
+Aave always returns asset price in ETH. `getETHPriceInAsset` is added to find the reverse, which is calculated by taking
+reciprocal of corresponding `getAssetPrice`. `DSMath` is added for proper decimal division (in `WAD`) (from
+https://github.com/dapphub/ds-math).
+
+This method is useful when you want to find the price of an asset in terms of another asset. Provided that both assets
+ETH prices are available, you can:
+
+```
+toAmount = fromAmount * getETHPriceInAsset(fromAsset) * getAssetPrice(toAsset)
+```
+
+Commit: https://github.com/pinglamb/price-oracle-solidity/commit/b0b6bc8552e7d5f9713e972014d6aa188cc1c433
+
 #### Test Cases
 
 Unit tests are added to test the provider implementation against Chainlink Aggregator.
