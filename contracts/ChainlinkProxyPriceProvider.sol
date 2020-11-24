@@ -4,11 +4,14 @@
 // - Upgrade to solidity 0.6.11
 // - Remove fallbackOracle
 // - Store ethAddress (for potential WETH support)
+// - Add getETHPriceInAsset
 
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.6.11;
 
 import '@openzeppelin/contracts/access/Ownable.sol';
+
+import './libraries/DSMath.sol';
 
 import './interfaces/IPriceOracleGetter.sol';
 import './interfaces/IChainlinkAggregator.sol';
@@ -20,6 +23,8 @@ import './interfaces/IChainlinkAggregator.sol';
 /// - If the returned price by a Chainlink aggregator is <= 0, the transaction will be reverted
 /// - Owned by the Aave governance system, allowed to add sources for assets, replace them
 contract ChainlinkProxyPriceProvider is IPriceOracleGetter, Ownable {
+    using DSMath for uint256;
+
     event AssetSourceUpdated(address indexed asset, address indexed source);
 
     mapping(address => IChainlinkAggregator) private assetsSources;
@@ -64,6 +69,23 @@ contract ChainlinkProxyPriceProvider is IPriceOracleGetter, Ownable {
             require(_price > 0, 'INVALID_PRICE');
 
             return uint256(_price);
+        }
+    }
+
+    /// @notice Gets ETH price in terms of asset, which is the reciprocal of getAssetPrice
+    ///         the number is not reounded by the asset actual number of decimal places
+    ///         expect proper rounding is done outside of this function and getAssetPrice
+    ///         returns number in WAD format
+    /// @param _asset The asset address
+    function getETHPriceInAsset(address _asset) external view returns (uint256) {
+        if (_asset == ethAddress) {
+            return 1 ether;
+        } else {
+            uint256 _assetPrice = getAssetPrice(_asset);
+            uint256 _price = _assetPrice.reciprocal();
+            require(_price > 0, 'INVALID_PRICE');
+
+            return _price;
         }
     }
 

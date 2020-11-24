@@ -53,6 +53,35 @@ describe('ChainlinkProxyPriceProvider', function () {
     })
   })
 
+  describe('getETHPriceInAsset', function () {
+    it('gets ETH price in terms of asset', async function () {
+      expect(await this.provider.getETHPriceInAsset(this.USDTAddress)).to.be.bignumber.equal(
+        ether('596.302921884317233154')
+      )
+      expect(await this.provider.getETHPriceInAsset(this.LINKAddress)).to.be.bignumber.equal(
+        ether('40.051891230277948110')
+      )
+    })
+
+    it('returns 1 ether if the eth address is provided', async function () {
+      expect(await this.provider.getETHPriceInAsset(this.WETHAddress)).to.be.bignumber.equal(ether('1'))
+    })
+
+    it('reverts if calculated price is zero', async function () {
+      // For some reason the price oracle returns a huge number, e.g. 10 ** 19
+      await this.USDTETH.setLatestAnswer(ether('10000000000000000000'), '1606151568')
+      await expectRevert(this.provider.getETHPriceInAsset(this.USDTAddress), 'INVALID_PRICE')
+    })
+
+    it('reverts if source of asset price is returning zero or negative number', async function () {
+      await this.USDTETH.setLatestAnswer('0', '1606151568')
+      await expectRevert(this.provider.getETHPriceInAsset(this.USDTAddress), 'INVALID_PRICE')
+
+      await this.LINKETH.setLatestAnswer('-1', '1606150638')
+      await expectRevert(this.provider.getETHPriceInAsset(this.LINKAddress), 'INVALID_PRICE')
+    })
+  })
+
   describe('getAssetsPrices', function () {
     it('gets a list of prices from a list of assets addresses', async function () {
       const prices = await this.provider.getAssetsPrices([this.USDTAddress, this.LINKAddress])
