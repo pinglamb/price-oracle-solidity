@@ -22,3 +22,29 @@ jobs:
     - run: yarn lint
     - run: yarn test
     - run: yarn coverage
+
+  slither:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+    - uses: actions/cache@v2
+      id: yarn-cache
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+    - run: yarn
+    - run: mkdir -p build/contracts
+    - name: slither .
+      uses: docker://trailofbits/eth-security-toolbox:latest
+      with:
+        args: |
+          -c "export HOME=/home/ethsec && cp -R /github/workspace /home/ethsec/workspace && \
+              slither \
+              --exclude-informational --exclude-dependencies --exclude-optimization --filter-paths ./contracts/mocks \
+              /home/ethsec/workspace"
