@@ -1,6 +1,9 @@
 Chainlink Proxy Price Provider
 ==============================
 
+[![ci](https://github.com/pinglamb/price-oracle-solidity/workflows/CI/badge.svg?branch=master)](https://github.com/pinglamb/price-oracle-solidity/actions)
+[![codecov](https://codecov.io/gh/pinglamb/price-oracle-solidity/branch/master/graph/badge.svg?token=RXUFAL4T3R)](https://codecov.io/gh/pinglamb/price-oracle-solidity)
+
 Implementation of using Chainlink as price oracle for getting ETH price of stored assets.
 
 It is extracted from [Aave Protocol](https://github.com/aave/aave-protocol) with some changes.
