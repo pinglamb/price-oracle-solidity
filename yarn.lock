@@ -247,10 +247,9 @@
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-3.2.0.tgz#3e6b3a7662d8ed64271ade96ef42655db983fd9d"
   integrity sha512-bUOmkSoPkjnUyMiKo6RYnb0VHBk5D9KKDAgNLzF41aqAM3TeE0yGdFF5dVRcV60pZdJLlyFT/jjXIZCWyyEzAQ==
 
-"@openzeppelin/test-environment@^0.1.6":
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/test-environment/-/test-environment-0.1.6.tgz#6abdf6218ad236be2815e123c963db6f1e02c401"
-  integrity sha512-9SGzS2y8gr+3Uj2g03+c53nNkHpj5jExGfw7YyWTGKhZpNYZe0lWGEHZpxpKvSN89rTFNkQwJ0NYnL4lauYOsQ==
+"@openzeppelin/test-environment@https://github.com/pinglamb/openzeppelin-test-environment.git#2b09df3":
+  version "0.1.7"
+  resolved "https://github.com/pinglamb/openzeppelin-test-environment.git#2b09df3cc18a894795e75392040fd75929485117"
   dependencies:
     "@openzeppelin/contract-loader" "^0.6.1"
     "@truffle/contract" "^4.0.38"
