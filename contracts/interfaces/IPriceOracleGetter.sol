@@ -9,10 +9,15 @@ pragma solidity ^0.6.11;
 
 /************
 @title IPriceOracleGetter interface
-@notice Interface for the Aave price oracle.*/
+@notice Interface for the price oracle.*/
 interface IPriceOracleGetter {
     /***********
     @dev returns the asset price in ETH
      */
     function getAssetPrice(address _asset) external view returns (uint256);
+
+    /***********
+    @dev returns the ETH price in asset
+     */
+    function getETHPriceInAsset(address _asset) external view returns (uint256);
 }

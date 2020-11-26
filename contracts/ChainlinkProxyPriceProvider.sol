@@ -17,11 +17,10 @@ import './interfaces/IPriceOracleGetter.sol';
 import './interfaces/IChainlinkAggregator.sol';
 
 /// @title ChainlinkProxyPriceProvider
-/// @author Aave
 /// @notice Proxy smart contract to get the price of an asset from a price source, with Chainlink Aggregator
 ///         smart contracts as primary option
 /// - If the returned price by a Chainlink aggregator is <= 0, the transaction will be reverted
-/// - Owned by the Aave governance system, allowed to add sources for assets, replace them
+/// - Can be owned by the governance system, allowed to add sources for assets, replace them
 contract ChainlinkProxyPriceProvider is IPriceOracleGetter, Ownable {
     using DSMath for uint256;
 
@@ -37,7 +36,7 @@ contract ChainlinkProxyPriceProvider is IPriceOracleGetter, Ownable {
         internalSetAssetsSources(_assets, _sources);
     }
 
-    /// @notice External function called by the Aave governance to set or replace sources of assets
+    /// @notice External function called by the owner to set or replace sources of assets
     /// @param _assets The addresses of the assets
     /// @param _sources The address of the source of each asset
     function setAssetSources(address[] calldata _assets, address[] calldata _sources) external onlyOwner {
@@ -77,7 +76,7 @@ contract ChainlinkProxyPriceProvider is IPriceOracleGetter, Ownable {
     ///         expect proper rounding is done outside of this function and getAssetPrice
     ///         returns number in WAD format
     /// @param _asset The asset address
-    function getETHPriceInAsset(address _asset) external view returns (uint256) {
+    function getETHPriceInAsset(address _asset) external view override returns (uint256) {
         if (_asset == ethAddress) {
             return 1 ether;
         } else {
