@@ -45,6 +45,4 @@ jobs:
       with:
         args: |
           -c "export HOME=/home/ethsec && cp -R /github/workspace /home/ethsec/workspace && \
-              slither \
-              --exclude-informational --exclude-dependencies --exclude-optimization --filter-paths ./contracts/mocks \
-              /home/ethsec/workspace"
+              cd /home/ethsec/workspace && slither ."
