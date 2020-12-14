@@ -39,7 +39,19 @@ This method is useful when you want to find the price of an asset in terms of an
 ETH prices are available, you can:
 
 ```
-toAmount = fromAmount * getETHPriceInAsset(fromAsset) * getAssetPrice(toAsset)
+toAmount = fromAmount * getAssetPrice(fromAsset) * getETHPriceInAsset(toAsset)
+```
+
+However, this method is returning the price in 18 decimal places regardless of decimals setting of the asset, to
+calculate the result with decimals places respecting the ERC20 token setting, one might need to do the following:
+
+```
+toAmount = fromAmount
+    .mul(getAssetPrice(address(fromAsset))     // Convert to proper ETH amount (18dp)
+    .div(10**fromAsset.decimals())             // by dividing number of dp of fromAsset
+    .wmul(getETHPriceInAsset(address(toAsset)) // wmul from ds-math, for 18dp * 18dp => 18dp
+    .mul(10**toAsset.deciamls())               // Convert to proper toAsset amount
+    .div(10**18)                               // by dividing number of dp of ETH
 ```
 
 Commit: https://github.com/pinglamb/price-oracle-solidity/commit/b0b6bc8552e7d5f9713e972014d6aa188cc1c433
