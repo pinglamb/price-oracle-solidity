@@ -1,12 +1,18 @@
-import { accounts, contract } from '@openzeppelin/test-environment'
+import { artifacts, web3 } from 'hardhat'
 import { ether, expectRevert, constants } from '@openzeppelin/test-helpers'
 import { expect } from 'chai'
 
-const ChainlinkProxyPriceProvider = contract.fromArtifact('ChainlinkProxyPriceProvider')
-const MockChainlinkAggregator = contract.fromArtifact('MockChainlinkAggregator')
+const ChainlinkProxyPriceProvider = artifacts.require('ChainlinkProxyPriceProvider')
+const MockChainlinkAggregator = artifacts.require('MockChainlinkAggregator')
 
 describe('ChainlinkProxyPriceProvider', function () {
-  const [owner, ...users] = accounts
+  let owner, users
+
+  beforeEach(async function () {
+    const [first, ...rest] = await web3.eth.getAccounts()
+    owner = first
+    users = rest
+  })
 
   beforeEach(async function () {
     this.USDTAddress = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
