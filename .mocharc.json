@@ -1,8 +1,0 @@
-{
-  "extension": ["ts"],
-  "require": "ts-node/register",
-  "recursive": true,
-  "exclude": ["test/types/**/*.d.ts"],
-  "exit": true,
-  "timeout": 12000
-}

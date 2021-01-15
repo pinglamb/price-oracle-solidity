@@ -39,7 +39,6 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-yarn-
     - run: yarn
-    - run: mkdir -p build/contracts
     - name: slither .
       uses: docker://trailofbits/eth-security-toolbox:latest
       with:
